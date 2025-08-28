@@ -21,7 +21,7 @@ class ProductAPI(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({'status':True,'data':serializer.data,'message':'Product successfully added'},status=status.HTTP_200_OK)
-        return Response({'status':True,'errors':serializer.errors},status=status.HTTP_200_OK)
+        return Response({'status':False,'errors':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self,request,id):
         try:
@@ -30,10 +30,10 @@ class ProductAPI(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response({'status':True,'data':serializer.data,'message':'Product Successfully updated'},status=status.HTTP_200_OK)
-            return Response({'status':True,'errors':serializer.errors},status=status.HTTP_200_OK)
+            return Response({'status':False,'errors':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
         
         except ProductModel.DoesNotExist:
-            return Response({'status':True,'message':'Product not Available'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':False,'message':'Product not Available'},status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self,request,id):
         try:
@@ -43,4 +43,4 @@ class ProductAPI(APIView):
 
         
         except ProductModel.DoesNotExist:
-            return Response({'status':True,'message':'Product not Available'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':False,'message':'Product not Available'},status=status.HTTP_400_BAD_REQUEST)

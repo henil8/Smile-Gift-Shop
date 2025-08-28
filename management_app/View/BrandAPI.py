@@ -34,7 +34,7 @@ class BrandAPI(APIView):
                 return Response({'status':True,'data':serializer.data,'message':'Brand Successfully updated'})
             return Response({'status':False,'errors':serializer.errors})
         except BrandModel.DoesNotExist:
-            return Response({'status':False,'message':'Brand not available'})
+            return Response({'status':False,'message':'Brand not available'},status=status.HTTP_400_BAD_REQUEST)
     
 
     def delete(self,request,id):
@@ -44,5 +44,5 @@ class BrandAPI(APIView):
             return Response({'status':True,'message':'Brand Successfully deleted'})
 
         except BrandModel.DoesNotExist:
-           return Response({'status':False,'message':'Brand not available'})
+           return Response({'status':False,'message':'Brand not available'},status=status.HTTP_400_BAD_REQUEST)
            

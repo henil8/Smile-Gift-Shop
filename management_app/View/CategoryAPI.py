@@ -41,7 +41,7 @@ class CategoryAPI(APIView):
             else:
                 return Response({'status':False,'errors':serializer.errors})
         except CategoryModel.DoesNotExist:
-            return Response({'status':False,'message':'Category not available'})
+            return Response({'status':False,'message':'Category not available'},status=status.HTTP_400_BAD_REQUEST)
         
     def delete(self,request,id):
         try :
@@ -49,7 +49,7 @@ class CategoryAPI(APIView):
             category.delete()
             return Response({'status':True,'message':'Category successfully deleted'})
         except CategoryModel.DoesNotExist:
-           return Response({'status':True,'message':'Category not available'})
+           return Response({'status':False,'message':'Category not available'},status=status.HTTP_400_BAD_REQUEST)
                  
 
             
@@ -97,7 +97,7 @@ class SubCategoryAPI(APIView):
            
              
         except CategoryModel.DoesNotExist:
-            return Response({'status':True,'message':'Sub Category not available'})
+            return Response({'status':False,'message':'Sub Category not available'},status=status.HTTP_400_BAD_REQUEST)
         
     def delete(self,request,id):
         try :
@@ -105,4 +105,4 @@ class SubCategoryAPI(APIView):
             sub_category.delete()
             return Response({'status':True,'message':'Category successfully deleted'})
         except CategoryModel.DoesNotExist:
-           return Response({'status':True,'message':'Category not available'})
+           return Response({'status':False,'message':'Category not available'},status=status.HTTP_400_BAD_REQUEST)
