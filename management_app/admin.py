@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import *
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
+from django.utils.html import format_html
 # Register your models here.
 
 
@@ -37,13 +38,37 @@ class ProductTagAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImageModel
+    extra = 1
+    readonly_fields = ['image_preview']
+    fields = ['image','image_preview']
+
+    def image_preview(self,obj):
+        if obj.image:
+             return format_html('<img src="{}" width="100" height="75" style="object-fit:cover; border-radius:4px;" />', obj.image.url)
+        return "-"
+    image_preview.short_description = 'Preview'
+
+@admin.register(ProductImageModel)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ['id','product', 'image']
+    readonly_fields = ['thumbnail_preview']
+    
+    def thumbnail_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="100" height="75" style="object-fit:cover; border-radius:4px;" />', obj.image.url)
+        return "-"
+    thumbnail_preview.short_description = 'Preview'
+
 @admin.register(ProductModel)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "short_name", "product_price", "brand", "category", "is_published", "is_archived")
+    list_display = ("id","name", "short_name", "product_price", "brand", "is_published", "is_archived")
     list_filter = ("brand", "category", "is_published", "is_archived", "product_use_type", "product_type")
     search_fields = ("name", "short_name", "item_code", "company_code", "hsn_code")
+    inlines = [ProductImageInline]
     ordering = ("-created_at",)
-    filter_horizontal = ("product_tag",)
+    filter_horizontal = ("product_tag","category","sub_category")
 
 
 # -------------------------
@@ -174,3 +199,4 @@ class BankDetailsAdmin(admin.ModelAdmin):
     list_display = ("bank_name", "account_number", "ifsc_code", "account_holder_name", "kyc_detail")
     search_fields = ("bank_name", "account_number", "ifsc_code")
     list_filter = ("bank_name",)
+
