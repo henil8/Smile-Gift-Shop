@@ -31,8 +31,8 @@ class ProductSerializer(serializers.ModelSerializer):
     # images = PropertyImageSerializer(many=True,read_only=True)
     # remove_image_ids = serializers.CharField(write_only=True, required=False)
     brand_name = serializers.CharField(source='brand.name',read_only=True)
-    category = serializers.CharField(write_only=True)
-    sub_category = serializers.CharField(write_only=True)
+    category = serializers.ListField(write_only=True)
+    sub_category = serializers.ListField(write_only=True)
 
 
     def create(self, validated_data):

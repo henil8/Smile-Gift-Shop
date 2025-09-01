@@ -2,7 +2,7 @@ from django.urls import path,include
 from management_app.View.CategoryAPI import *
 from management_app.View.ProductAPI import *
 from management_app.View.BrandAPI import *
-
+from management_app.MobileAPIView.ProductViews import GetProductAPI, FilterProductAPI, AddProductAPI
 
 
 urlpatterns = [
@@ -17,5 +17,10 @@ urlpatterns = [
     path('products/<int:id>/',ProductAPI.as_view(),name='products'),
 
     path('brands/',BrandAPI.as_view(),name='brands'),
-    path('brands/<int:id>/',BrandAPI.as_view(),name='brands')
+    path('brands/<int:id>/',BrandAPI.as_view(),name='brands'),
+
+
+    path('get_product/', GetProductAPI.as_view(), name='getproduct-api'),
+    path('filter_product/', FilterProductAPI.as_view(), name='filterproduct-api'),
+    path('add_product/', AddProductAPI.as_view(), name='addproduct-api')
 ]
