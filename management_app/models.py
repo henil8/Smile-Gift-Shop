@@ -106,7 +106,9 @@ class ProductModel(models.Model):
         ("bottle", "Bottle"),
         ("jar", "Jar"),
     ]
-    category = models.ForeignKey(CategoryModel, on_delete=models.CASCADE, blank=True ,null=True, related_name='product_single_category')
+
+    category = models.ManyToManyField(CategoryModel, blank=True , related_name='product_single_category')
+    sub_category = models.ManyToManyField(CategoryModel, blank=True , related_name='product_sub_category')
     name = models.CharField(max_length=255)
     unit = models.CharField(max_length=100,choices=UNIT_CHOICES)
     short_name = models.CharField(max_length=255)
@@ -165,8 +167,8 @@ class ProductModel(models.Model):
     can_be_purchased = models.BooleanField(default=True)
     hsn_code = models.CharField(max_length=255, null=True, blank=True)
     is_tracking  = models.BooleanField(default=False)
-    is_archived = models.BooleanField(default=False)
-    is_published = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=True)
     product_tag = models.ManyToManyField(ProductTag, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -191,7 +193,6 @@ class ProductModel(models.Model):
         verbose_name = "product"
         verbose_name_plural = "products"
         indexes = [
-            models.Index(fields=['category'], name='idx_category'),
             models.Index(fields=['name'], name='idx_name'),
             models.Index(fields=['short_name'], name='idx_short_name'),
             models.Index(fields=['product_price'], name='idx_product_price'),
@@ -206,7 +207,18 @@ class ProductModel(models.Model):
             models.Index(fields=['weight'], name='idx_weight'),
         ]
 
+class ProductImageModel(models.Model):
+    product = models.ForeignKey(ProductModel,on_delete=models.CASCADE,related_name='images')
+    image = models.ImageField(upload_to="Products")
 
+    class Meta:
+        verbose_name = "Product Image"
+        verbose_name_plural = "Product Images"
+        ordering = ['product__created_at']
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+  
 class NewsModel(models.Model):
    title = models.CharField(max_length=100)
    image = models.ImageField(null=True,blank=True)

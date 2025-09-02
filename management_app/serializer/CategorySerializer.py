@@ -3,10 +3,11 @@ from ..models import *
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
+    category_name = serializers.CharField(source="name")
+    category_image =serializers.ImageField(source="image")
     class Meta:
         model = CategoryModel
-        fields = ('id','name','image')
+        fields = ('id','category_name','category_image')
 
     def create(self, validated_data):
         return CategoryModel.add_root(**validated_data)
@@ -14,9 +15,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
+    
     main_category = serializers.SerializerMethodField()
     parent_id = serializers.IntegerField(write_only=True)
-
+    id = serializers.IntegerField(read_only=True)  
+    category_id = serializers.IntegerField(source="get_parent.id", read_only=True)
+    sub_category_name = serializers.CharField(source="name")
+    sub_category_image = serializers.ImageField(source="image")
+    category = CategorySerializer(source='get_parent', read_only=True)
+   
     def get_main_category(self,obj):
         if obj.get_parent():
             return obj.get_parent().name
@@ -57,4 +64,14 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CategoryModel
-        fields = ('id','name','main_category','image','full_path','parent_id')
+        # fields = ('id','category_id','category_id','main_category','sub_category_image','full_path','parent_id')
+        fields=(
+            'id',               
+            'category_id',
+            'sub_category_name',
+            'sub_category_image',
+            'main_category',
+            'parent_id',
+            'category',
+            
+        )
