@@ -7,6 +7,7 @@ from tinymce_4.fields import TinyMCEModelField
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import base64
+from user_app.models import UserModel
 # Create your models here.
 
 class CategoryTagsModel(models.Model):
@@ -56,8 +57,6 @@ class CategoryModel(MP_Node):
             models.Index(fields=['full_pathtext'], name='idx_category_full_pathtext'),
         ]
 
-
- 
 class BrandModel(models.Model):
     name = models.CharField(max_length=255)
     image = models.ImageField(null=True,blank=True)
@@ -107,8 +106,7 @@ class ProductModel(models.Model):
         ("bottle", "Bottle"),
         ("jar", "Jar"),
     ]
- 
- 
+
     category = models.ManyToManyField(CategoryModel, blank=True , related_name='product_single_category')
     sub_category = models.ManyToManyField(CategoryModel, blank=True , related_name='product_sub_category')
     name = models.CharField(max_length=255)
@@ -592,3 +590,38 @@ class BankDetailsModel(models.Model):
 
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
+
+
+class Cart(models.Model):
+    STATUS_CHOICES = (
+        (0, "In Cart"),  
+        (1, "Ordered"),   
+        (2, "Removed"),   
+    )
+
+    user = models.ForeignKey(
+        UserModel, on_delete=models.CASCADE, related_name="cart_items"
+    )
+    product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name="product")
+    brand = models.ForeignKey(BrandModel, on_delete=models.SET_NULL, null=True, blank=True, related_name="brand")
+
+    qty = models.PositiveIntegerField(default=1)
+    price = models.FloatField()
+
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.product:
+            self.price = self.product.product_price  
+        super().save(*args, **kwargs)
+
+    @property
+    def total_price(self):
+        return self.price * self.qty
+
+    def __str__(self):
+        return f"{self.product.name} ({self.qty})"
