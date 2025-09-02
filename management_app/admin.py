@@ -174,3 +174,15 @@ class BankDetailsAdmin(admin.ModelAdmin):
     list_display = ("bank_name", "account_number", "ifsc_code", "account_holder_name", "kyc_detail")
     search_fields = ("bank_name", "account_number", "ifsc_code")
     list_filter = ("bank_name",)
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = (
+            "id","user","product","brand","qty","price","total_price","status","created_at","updated_at",
+        )
+    list_filter = ("status", "created_at", "updated_at", "brand")
+    search_fields = ("user__email", "user__first_name", "user__last_name", "product__name", "brand__name")
+    ordering = ("-created_at",)
+
+    def total_price(self, obj):
+            return obj.total_price
