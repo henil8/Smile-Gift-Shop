@@ -15,7 +15,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
-    
+     
     main_category = serializers.SerializerMethodField()
     parent_id = serializers.IntegerField(write_only=True)
     id = serializers.IntegerField(read_only=True)  
