@@ -200,6 +200,11 @@ class BankDetailsAdmin(admin.ModelAdmin):
     search_fields = ("bank_name", "account_number", "ifsc_code")
     list_filter = ("bank_name",)
 
+
+@admin.register(FavouriteModel)
+class FavouriteAdmin(admin.ModelAdmin):
+    list_display = ("user_id", "product_id", "status", "created_at", "updated_at", "deleted_at")
+    search_fields = ("user_id", "product_id", "created_at")
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
     list_display = (

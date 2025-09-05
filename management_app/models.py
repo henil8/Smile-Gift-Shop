@@ -59,6 +59,7 @@ class CategoryModel(MP_Node):
             models.Index(fields=['full_pathtext'], name='idx_category_full_pathtext'),
         ]
 
+
 class BrandModel(models.Model):
     name = models.CharField(max_length=255)
     image = models.ImageField(null=True,blank=True)
@@ -171,9 +172,11 @@ class ProductModel(models.Model):
     is_tracking  = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=True)
     is_published = models.BooleanField(default=True)
+    is_favourite = models.BooleanField(default=False)
     product_tag = models.ManyToManyField(ProductTag, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     @property
     def encrypted_id(self):
@@ -212,6 +215,10 @@ class ProductModel(models.Model):
 class ProductImageModel(models.Model):
     product = models.ForeignKey(ProductModel,on_delete=models.CASCADE,related_name='images')
     image = models.ImageField(upload_to="Products")
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    is_primary = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Product Image"
@@ -613,6 +620,16 @@ class BankDetailsModel(models.Model):
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
 
+class FavouriteModel(models.Model):
+    user_id = models.ForeignKey('user_app.UserModel', on_delete=models.CASCADE)
+    product_id = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+    status = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.status
 
 class Cart(models.Model):
     STATUS_CHOICES = (

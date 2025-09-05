@@ -3,9 +3,12 @@ from management_app.View.CategoryAPI import *
 from management_app.View.ProductAPI import *
 from management_app.MobileAPIView.CartAPIView import GetCartAPIView,AddToCartAPIView,UpdateCartAPIView,RemoveCartAPIView
 from management_app.View.BrandAPI import *
+
+from management_app.MobileAPIView.FavouriteViews import AddFavouriteAPI, RemoveFavouriteAPI, ListFavouriteAPI
 from management_app.MobileAPIView.ProductViews import GetProductAPI, FilterProductAPI, AddProductAPI, SubCategoryProductListAPI
 from management_app.MobileAPIView.CategoryAPIView import *
 from management_app.MobileAPIView.OrderAPIView import PlaceOrderView, UserOrdersView, OrderDetailView
+
 
 urlpatterns = [
 
@@ -33,9 +36,15 @@ urlpatterns = [
     path('mobile/add-to-cart/', AddToCartAPIView.as_view(), name='add-to-cart'),
     path('mobile/update-cart/', UpdateCartAPIView.as_view(), name='update-cart'),
     path('mobile/remove-cart/', RemoveCartAPIView.as_view(), name='remove-cart'),
+  
+    path('add_favourite/', AddFavouriteAPI.as_view(), name='add-favourite'),
+    path('remove_favourite/', RemoveFavouriteAPI.as_view(), name='remove-favourite'),
+    path('list_favourite/', ListFavouriteAPI.as_view(), name='list-favourite'),
+    path('add_product/', AddProductAPI.as_view(), name='addproduct-api'),
     
     path('mobile/add-place-order/', PlaceOrderView.as_view(), name='place-order'),
     path('mobile/list-product-order/', UserOrdersView.as_view(), name='user-orders'),
     path('mobile/details-product-order/', OrderDetailView.as_view(), name='order-detail')
+
 
 ]
