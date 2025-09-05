@@ -200,3 +200,14 @@ class BankDetailsAdmin(admin.ModelAdmin):
     search_fields = ("bank_name", "account_number", "ifsc_code")
     list_filter = ("bank_name",)
 
+@admin.register(VersionModel)
+class VersionAdmin(admin.ModelAdmin):
+    list_display = ("android_id","android_version","android_description","android_status","ios_id",
+                    "ios_version","ios_description","ios_status")
+    search_fields = ("android_id","ios_id")
+    
+
+@admin.register(OfferSliderModel)
+class OffersliderAdmin(admin.ModelAdmin):
+    list_display = ("image","banner_number","created_at","updated_at","deleted_at")
+    search_fields = ()

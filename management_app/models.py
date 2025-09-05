@@ -7,6 +7,7 @@ from tinymce_4.fields import TinyMCEModelField
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import base64
+from user_app.models import UserModel
 # Create your models here.
 
 class CategoryTagsModel(models.Model):
@@ -174,6 +175,7 @@ class ProductModel(models.Model):
     product_tag = models.ManyToManyField(ProductTag, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    deleted_at=models.DateTimeField(blank=True, null=True)
 
     @property
     def encrypted_id(self):
@@ -212,6 +214,9 @@ class ProductModel(models.Model):
 class ProductImageModel(models.Model):
     product = models.ForeignKey(ProductModel,on_delete=models.CASCADE,related_name='images')
     image = models.ImageField(upload_to="Products")
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at=models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Product Image"
@@ -254,6 +259,10 @@ class InquiryModel(models.Model):
     status = models.CharField(max_length=30,choices=[
         ("Pending", "Pending"),
         ("Complete", "Complete")])
+    user = models.ForeignKey(UserModel,on_delete=models.CASCADE,related_name='user')
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
     
 
     class Meta:
@@ -592,3 +601,38 @@ class BankDetailsModel(models.Model):
 
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
+    
+    
+class VersionModel(models.Model):
+    
+    android_id=models.IntegerField()
+    android_version = models.CharField(max_length=100)
+    android_description =TinyMCEModelField(null=True,blank=True)
+    android_status=models.CharField(max_length=30)
+    
+    ios_id=models.IntegerField()
+    ios_version = models.CharField(max_length=100)
+    ios_description =TinyMCEModelField(null=True,blank=True)
+    ios_status=models.CharField(max_length=30)
+    
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    
+    def __str__(self):
+        return self.android_status
+
+class OfferSliderModel(models.Model):
+    """Slider banners"""
+    image = models.ImageField(upload_to="offer_sliders/",null=True,blank=True)   # 1080x500 recommended
+    banner_number = models.PositiveIntegerField()
+ 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True,blank=True)
+ 
+    class Meta:
+        ordering = ["banner_number"]  # always sorted by number
+ 
+    def __str__(self):
+        return f"Slider {self.banner_number}"
