@@ -6,24 +6,26 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from ..models import ProfileModel
 from ..serializers import UserSerializer
-
+from rest_framework.permissions import IsAuthenticated
 
 class VerifyOtpAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
     def post(self, request):
-        mobile_no = request.data.get("mobile_no")
+        mobile_no = request.data.get("contact")
         user_id = request.data.get("user_id")
         otp = request.data.get("otp")
+        os_type = request.data.get("os_type")
 
         if not otp:
             return Response(
                 {"status": False, "message": "OTP is required."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         if not mobile_no and not user_id:
             return Response(
                 {"status": False, "message": "Either user_id or mobile_no is required."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         try:
@@ -34,7 +36,7 @@ class VerifyOtpAPIView(APIView):
         except ProfileModel.DoesNotExist:
             return Response(
                 {"status": False, "message": "User profile not found."},
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_200_OK,
             )
 
         # OTP match check
@@ -50,6 +52,8 @@ class VerifyOtpAPIView(APIView):
 
         # OTP verified → clear otp
         profile.otp = None
+        if os_type:  
+            profile.os_type = os_type
         profile.save()
 
         user = profile.user

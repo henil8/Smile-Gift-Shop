@@ -20,7 +20,7 @@ class LoginView(APIView):
         if not mobile:
             return Response(
                 {"mobile": "This field is required."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
         
         if not mobile.startswith("+91"):
@@ -31,7 +31,7 @@ class LoginView(APIView):
         except ProfileModel.DoesNotExist:
             return Response(
                 {"status": False, "message": "Mobile number not registered!"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         # generate OTP
@@ -47,7 +47,7 @@ class LoginView(APIView):
 
         profile.refresh_from_db()
         user_serializer = UserSerializer(user)
-
+        token,_ = Token.objects.get_or_create(user=user)
         # TODO: send OTP via SMS/Email gateway here
         # send_sms(mobile, f"Your OTP is {otp_code}")
 
@@ -55,11 +55,11 @@ class LoginView(APIView):
             {
                 "status": True,
                 "message": "otp sent successfully",
-                "data" : user_serializer.data
+                "data" : user_serializer.data,
+                "token" : "Token "+token.key
             },
             status=status.HTTP_200_OK,
         )
-
 
 
 

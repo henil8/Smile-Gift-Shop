@@ -163,9 +163,10 @@ class ProfileModel(models.Model):
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
     profile_pic = models.ImageField(upload_to='Profile', blank=True, null=True)
     mobile_no = PhoneNumberField(unique=True, blank=True, null=True)
-    addresses = models.ManyToManyField(AddressModel, blank=True, null=True)
+    addresses = models.ManyToManyField(AddressModel, blank=True)
     otp = models.IntegerField(blank=True, null=True)
     otp_requested_at = models.DateTimeField(blank=True, null=True)
+    os_type = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return self.user.email

@@ -10,7 +10,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfileModel
         fields = [
-            "id", "contact","profile_pic", "addresses", "otp", "otp_requested_at",
+            "id", "contact","profile_pic", "addresses", "otp", "otp_requested_at","os_type",
         ]
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -32,8 +32,9 @@ class UserSerializer(serializers.ModelSerializer):
     contact = serializers.CharField(source="mobile_no")
     firebase_token = serializers.CharField(source="token")
 
-    profile_image = serializers.ImageField(source="profilemodel.profile_pic", read_only=True)
+    profile_image = serializers.ImageField(source="profilemodel.profile_pic",required=False, allow_null=True)
     otp = serializers.CharField(source="profilemodel.otp", read_only=True)
+    os_type = serializers.CharField(source="profilemodel.os_type", read_only=True)
 
     address = serializers.CharField(source="address.first.address", read_only=True)
     pincode = serializers.CharField(source="address.first.pincode", read_only=True)
@@ -41,11 +42,24 @@ class UserSerializer(serializers.ModelSerializer):
     # addresses = AddressSerializer(many=True)
     class Meta:
         model = UserModel
-        fields = ["id","first_name", "last_name","email", "contact","address","pincode","profile_image","otp", "is_active","created_at","firebase_token"]
+        fields = ["id","first_name", "last_name","email", "contact","address","pincode","profile_image","otp","os_type", "is_active","created_at","firebase_token"]
 
     def create(self, validated_data):
         validated_data["is_active"] = True  # force is_active=True
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+
+        profile_data = validated_data.pop("profilemodel", {})
+
+        instance = super().update(instance, validated_data)
+
+        profile = getattr(instance, "profilemodel", None)
+        if profile and "profile_pic" in profile_data:
+            profile.profile_pic = profile_data["profile_pic"]
+            profile.save()
+
+        return instance
     
 class CountriesSerializer(serializers.ModelSerializer):
 

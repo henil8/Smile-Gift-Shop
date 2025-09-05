@@ -44,7 +44,7 @@ class AddressListView(APIView):
         if not user_id:
             return Response(
                 {"status": False, "message": "user_id is required"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
         user = get_object_or_404(UserModel, id=user_id)
         addresses = user.address.all()  
@@ -57,7 +57,7 @@ class AddressListView(APIView):
                     "data": None,
                     "errors": "Data Not Found",
                 },
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_200_OK,
             )
         
         data_with_user_id = []
@@ -80,7 +80,7 @@ class AddressCreateView(APIView):
         if not user_id:
             return Response(
                 {"status": False, "message": "user_id is required"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         user = get_object_or_404(UserModel, id=user_id)
@@ -113,4 +113,4 @@ class AddressCreateView(APIView):
                 status=status.HTTP_200_OK if existing_address else status.HTTP_201_CREATED,
             )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_200_OK)

@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from ..models import *
-from management_app.serializer.ProductSerializer import CartProductSerializer
+from management_app.serializer.ProductSerializer import MobileProductSerializer
 
 class CartSerializer(serializers.ModelSerializer):
-    product = CartProductSerializer(read_only=True)
+    product = MobileProductSerializer(read_only=True)
     total_price = serializers.ReadOnlyField()
 
     class Meta:
