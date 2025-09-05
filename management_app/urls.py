@@ -1,17 +1,16 @@
 from django.urls import path,include
 from management_app.View.CategoryAPI import *
 from management_app.View.ProductAPI import *
-from management_app.MobileAPIView.CartAPIView import GetCartAPIView,AddToCartAPIView,UpdateCartAPIView,RemoveCartAPIView
 from management_app.View.BrandAPI import *
-from management_app.View.CategoryAPIView import *
-from management_app.View.InquiryAPIView import *
-from management_app.View.VersionCheckAPIView import *
-from management_app.View.HomeAPIView import *
 
+from management_app.MobileAPIView.CartAPIView import GetCartAPIView,AddToCartAPIView,UpdateCartAPIView,RemoveCartAPIView
+from management_app.MobileAPIView.CategoryAPIView import *
+from management_app.MobileAPIView.InquiryAPIView import *
+from management_app.MobileAPIView.VersionCheckAPIView import *
+from management_app.MobileAPIView.HomeAPIView import *
 from management_app.MobileAPIView.FavouriteViews import AddFavouriteAPI, RemoveFavouriteAPI, ListFavouriteAPI
 from management_app.MobileAPIView.ProductViews import GetProductAPI, FilterProductAPI, AddProductAPI, SubCategoryProductListAPI
-from management_app.MobileAPIView.CategoryAPIView import *
-from management_app.MobileAPIView.OrderAPIView import PlaceOrderView, UserOrdersView, OrderDetailView
+# from management_app.MobileAPIView.OrderAPIView import PlaceOrderView, UserOrdersView, OrderDetailView
 
 
 urlpatterns = [
@@ -47,14 +46,14 @@ urlpatterns = [
     path('list_favourite/', ListFavouriteAPI.as_view(), name='list-favourite'),
     path('add_product/', AddProductAPI.as_view(), name='addproduct-api'),
     
-    path('mobile/add-place-order/', PlaceOrderView.as_view(), name='place-order'),
-    path('mobile/list-product-order/', UserOrdersView.as_view(), name='user-orders'),
-    path('mobile/details-product-order/', OrderDetailView.as_view(), name='order-detail')
+    # path('mobile/add-place-order/', PlaceOrderView.as_view(), name='place-order'),
+    # path('mobile/list-product-order/', UserOrdersView.as_view(), name='user-orders'),
+    # path('mobile/details-product-order/', OrderDetailView.as_view(), name='order-detail'),
   
     path('inquiry/',InquiryList.as_view(),name='category'),
     
     path('version-check/',VersionList.as_view(),name='category'),
-    path('home/',HomeList.as_view(),name='home')
+    path('home/',HomeList.as_view(),name='home'),
 
 
     
