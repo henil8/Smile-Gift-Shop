@@ -261,6 +261,10 @@ class InquiryModel(models.Model):
     status = models.CharField(max_length=30,choices=[
         ("Pending", "Pending"),
         ("Complete", "Complete")])
+    user = models.ForeignKey(UserModel,on_delete=models.CASCADE,related_name='user')
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
     
 
     class Meta:
@@ -620,6 +624,40 @@ class BankDetailsModel(models.Model):
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
 
+class VersionModel(models.Model):
+    
+    android_id=models.IntegerField()
+    android_version = models.CharField(max_length=100)
+    android_description =TinyMCEModelField(null=True,blank=True)
+    android_status=models.CharField(max_length=30)
+    
+    ios_id=models.IntegerField()
+    ios_version = models.CharField(max_length=100)
+    ios_description =TinyMCEModelField(null=True,blank=True)
+    ios_status=models.CharField(max_length=30)
+    
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    
+    def __str__(self):
+        return self.android_status
+
+class OfferSliderModel(models.Model):
+    """Slider banners"""
+    image = models.ImageField(upload_to="offer_sliders/",null=True,blank=True)   # 1080x500 recommended
+    banner_number = models.PositiveIntegerField()
+ 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True,blank=True)
+ 
+    class Meta:
+        ordering = ["banner_number"]  # always sorted by number
+ 
+    def __str__(self):
+        return f"Slider {self.banner_number}"
+
 class FavouriteModel(models.Model):
     user_id = models.ForeignKey('user_app.UserModel', on_delete=models.CASCADE)
     product_id = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
@@ -666,3 +704,4 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"{self.product.name} ({self.qty})"
+

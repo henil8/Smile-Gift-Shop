@@ -135,9 +135,10 @@ class MobileProductSerializer(serializers.ModelSerializer):
 
     def get_sub_category(self, obj):
         return ", ".join([sub.name for sub in obj.sub_category.all()]) if obj.sub_category.exists() else ""
-    
+
     class Meta:
         model = ProductModel
         fields = ['id','category_id_old','sub_category_id_old','product_name','distributer_price','retailer_price','product_price','description','brand_id','item_code','group','color','company_code','unit','hsn_code','upc_barcode',
                   'lan_barcode','super_distributor_rate','gst_percentage','end_use_sales_discount','warranty','feature','weight','document','web_link','video_link','short_name','limited_stock_status','out_of_stock_status','created_at','updated_at',
                   'category','sub_category','product_images']
+

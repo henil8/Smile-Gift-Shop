@@ -201,10 +201,24 @@ class BankDetailsAdmin(admin.ModelAdmin):
     list_filter = ("bank_name",)
 
 
+@admin.register(VersionModel)
+class VersionAdmin(admin.ModelAdmin):
+    list_display = ("android_id","android_version","android_description","android_status","ios_id",
+                    "ios_version","ios_description","ios_status")
+    search_fields = ("android_id","ios_id")
+    
+
+@admin.register(OfferSliderModel)
+class OffersliderAdmin(admin.ModelAdmin):
+    list_display = ("image","banner_number","created_at","updated_at","deleted_at")
+    search_fields = ()
+
+
 @admin.register(FavouriteModel)
 class FavouriteAdmin(admin.ModelAdmin):
     list_display = ("user_id", "product_id", "status", "created_at", "updated_at", "deleted_at")
     search_fields = ("user_id", "product_id", "created_at")
+    
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
     list_display = (
@@ -216,3 +230,4 @@ class CartAdmin(admin.ModelAdmin):
 
     def total_price(self, obj):
             return obj.total_price
+
