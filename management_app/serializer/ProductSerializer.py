@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import *
 import slugify,json
+from management_app.serializer.ProductImageSerializer import ProductImageSerializer
 
 
 class PropertyImageSerializer(serializers.ModelSerializer):
@@ -100,14 +101,43 @@ class ProductSerializer(serializers.ModelSerializer):
         model = ProductModel
         fields = '__all__'
 
-class CartProductSerializer(serializers.ModelSerializer):
+class MobileProductSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source = 'name')
     gst_percentage = serializers.IntegerField(source='gst')
     end_use_sales_discount = serializers.IntegerField(source='sales_discount')
-    limited_stock_status = serializers.CharField(source='limited_stock')
-    out_of_stock_status = serializers.CharField(source='out_of_stock')
+    limited_stock_status = serializers.SerializerMethodField()
+    out_of_stock_status = serializers.SerializerMethodField()
     super_distributor_rate =serializers.DecimalField(source='super_distributer_price',max_digits=10,   decimal_places=2)
+    category_id_old = serializers.SerializerMethodField()
+    sub_category_id_old = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    sub_category = serializers.SerializerMethodField()
+    product_images = ProductImageSerializer(many=True, required = False, source='images')
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    updated_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    
+    def get_limited_stock_status(self, obj):
+        return 1 if str(obj.limited_stock).lower() in ["yes", "true", "1"] else 0
 
+    def get_out_of_stock_status(self, obj):
+        return 1 if str(obj.out_of_stock).lower() in ["yes", "true", "1"] else 0
+    
+    def get_category_id_old(self,obj):
+        first_category = obj.category.values_list('id', flat=True).first()
+        return first_category
+    
+    def get_sub_category_id_old(self, obj):
+        first_category = obj.sub_category.values_list('id', flat=True).first()
+        return first_category
+    
+    def get_category(self, obj):
+        return ", ".join([cat.name for cat in obj.category.all()]) if obj.category.exists() else ""
+
+    def get_sub_category(self, obj):
+        return ", ".join([sub.name for sub in obj.sub_category.all()]) if obj.sub_category.exists() else ""
+    
     class Meta:
         model = ProductModel
-        fields = ['id','category_id','product_name','distributer_price','retailer_price','product_price','description','brand_id','item_code','group','color','company_code','unit','hsn_code','upc_barcode','lan_barcode','super_distributor_rate','gst_percentage','end_use_sales_discount','warranty','feature','weight','document','web_link','video_link','short_name','limited_stock_status','out_of_stock_status','created_at','updated_at']
+        fields = ['id','category_id_old','sub_category_id_old','product_name','distributer_price','retailer_price','product_price','description','brand_id','item_code','group','color','company_code','unit','hsn_code','upc_barcode',
+                  'lan_barcode','super_distributor_rate','gst_percentage','end_use_sales_discount','warranty','feature','weight','document','web_link','video_link','short_name','limited_stock_status','out_of_stock_status','created_at','updated_at',
+                  'category','sub_category','product_images']

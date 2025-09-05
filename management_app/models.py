@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import base64
 from user_app.models import UserModel
+import random
+import string
 # Create your models here.
 
 class CategoryTagsModel(models.Model):
@@ -316,10 +318,12 @@ class ThirdPartyModel(models.Model):
 
 
 class OrderModel(models.Model):
-    ORDER_STATUS = (('Pending', 'Pending'), ('Out for Delivery',
-                    'Out for Delivery'), ('Delivered', 'Delivered'), ('Cancelled', 'Cancelled'))
+    ORDER_STATUS = (('pending', 'pending'), ('out for delivery',
+                    'out for delivery'), ('delivered', 'delivered'), ('cancelled', 'cancelled'))
     PAYMENT_TYPE_CHOICES = (
-        ('Cash on Delivery', 'Cash on Delivery'), ('Online Payment', 'Online Payment'))
+        ('cod', 'cod'),
+        ('online', 'online'),
+    )
 
     class SALES_STATUS_CHOICES(models.TextChoices):
         quotation = ('Quotation', 'Quotation')
@@ -327,7 +331,7 @@ class OrderModel(models.Model):
         sales_order = ('Sales Order', 'Sales Order')
         cancel_order = ('Cancelled', 'Cancelled')
     
-    customer = models.ForeignKey('user_app.UserModel', on_delete=models.DO_NOTHING)
+    customer = models.ForeignKey('user_app.UserModel', on_delete=models.DO_NOTHING,blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     payment_id = models.CharField(max_length=255, blank=True, null=True)
     transaction_id = models.CharField(max_length=255, blank=True, null=True)
@@ -357,6 +361,19 @@ class OrderModel(models.Model):
     address = models.ForeignKey('user_app.AddressModel', on_delete= models.DO_NOTHING, blank=True,null=True)
     source_doc = models.CharField(max_length=255, blank=True, null=True)
     
+    brand_id = models.ForeignKey(BrandModel, on_delete=models.SET_NULL, null=True, blank=True)
+    recieved_id = models.IntegerField(blank=True, null=True)
+    delivery_status = models.CharField(choices=ORDER_STATUS, default='Pending', max_length=100)
+    pod_number = models.CharField(max_length=255, blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    review_status = models.CharField(max_length=50, default="pending")
+    main_price = models.FloatField(default=0.00)
+    percentage_off = models.FloatField(default=0.00)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    shipping_address = models.TextField(blank=True, null=True)
+    order_number = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    
     @property
     def total_order_qty(self):
         total_qt = 0
@@ -369,10 +386,15 @@ class OrderModel(models.Model):
         if not self.order_id:
             if OrderModel.objects.count() >= 1:
                 last_order_id = int(
-                    OrderModel.objects.last().order_id.removeprefix('SO'))
+                    OrderModel.objects.last().order_id.removeprefix('SGS'))
             else:
                 last_order_id = 0
             self.order_id = 'SGS' + str(last_order_id+1).zfill(8)
+
+        if not self.order_number:
+            letters = ''.join(random.choices(string.ascii_uppercase, k=4))
+            digits = str(random.randint(1000, 9999))
+            self.order_number = f"{letters}_{digits}"
 
         super(OrderModel, self).save(*args, **kwargs)
 
@@ -633,12 +655,14 @@ class Cart(models.Model):
 
     def save(self, *args, **kwargs):
         if self.product:
-            self.price = self.product.product_price  
+            self.price = float(self.product.product_price)
+        if self.product:
+            self.brand = self.product.brand
         super().save(*args, **kwargs)
 
     @property
     def total_price(self):
-        return self.price * self.qty
+        return self.price * float(self.qty)
 
     def __str__(self):
         return f"{self.product.name} ({self.qty})"
