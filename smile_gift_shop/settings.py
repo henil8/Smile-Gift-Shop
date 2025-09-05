@@ -91,6 +91,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'smile_gift_shop.wsgi.application'
 ASGI_APPLICATION = 'smile_gift_shop.asgi.application'
 
+# Email backend for development
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587  # Use 587 for TLS, or 465 for SSL
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'hetyxyz224@gmail.com'
+EMAIL_HOST_PASSWORD = 'wsso urqz ddsg frwa'  # Not your normal Gmail password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CORS_ALLOW_HEADERS = '*'

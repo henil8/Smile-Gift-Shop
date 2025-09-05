@@ -205,3 +205,14 @@ class BankDetailsAdmin(admin.ModelAdmin):
 class FavouriteAdmin(admin.ModelAdmin):
     list_display = ("user_id", "product_id", "status", "created_at", "updated_at", "deleted_at")
     search_fields = ("user_id", "product_id", "created_at")
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = (
+            "id","user","product","brand","qty","price","total_price","status","created_at","updated_at",
+        )
+    list_filter = ("status", "created_at", "updated_at", "brand")
+    search_fields = ("user__email", "user__first_name", "user__last_name", "product__name", "brand__name")
+    ordering = ("-created_at",)
+
+    def total_price(self, obj):
+            return obj.total_price
