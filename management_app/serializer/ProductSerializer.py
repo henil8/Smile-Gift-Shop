@@ -58,7 +58,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
         if images:
             for image in images:
-              ProductImageModel.objects.create(product=instance,image=image)
+              ProductImageModel.objects.create(product=instance, image=image)
 
         return instance
     
