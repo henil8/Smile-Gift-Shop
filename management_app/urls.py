@@ -41,19 +41,19 @@ urlpatterns = [
     path('mobile/update-cart/', UpdateCartAPIView.as_view(), name='update-cart'),
     path('mobile/remove-cart/', RemoveCartAPIView.as_view(), name='remove-cart'),
   
-    path('add_favourite/', AddFavouriteAPI.as_view(), name='add-favourite'),
-    path('remove_favourite/', RemoveFavouriteAPI.as_view(), name='remove-favourite'),
-    path('list_favourite/', ListFavouriteAPI.as_view(), name='list-favourite'),
-    path('add_product/', AddProductAPI.as_view(), name='addproduct-api'),
+    path('mobile/add_favourite/', AddFavouriteAPI.as_view(), name='add-favourite'),
+    path('mobile/remove_favourite/', RemoveFavouriteAPI.as_view(), name='remove-favourite'),
+    path('mobile/list_favourite/', ListFavouriteAPI.as_view(), name='list-favourite'),
+    path('mobile/add_product/', AddProductAPI.as_view(), name='addproduct-api'),
     
     # path('mobile/add-place-order/', PlaceOrderView.as_view(), name='place-order'),
     # path('mobile/list-product-order/', UserOrdersView.as_view(), name='user-orders'),
     # path('mobile/details-product-order/', OrderDetailView.as_view(), name='order-detail'),
   
-    path('inquiry/',InquiryList.as_view(),name='category'),
-    
-    path('version-check/',VersionList.as_view(),name='category'),
-    path('home/',HomeList.as_view(),name='home'),
+    path('mobile/inquiry/',InquiryList.as_view(),name='category'),
+
+    path('mobile/version-check/',VersionList.as_view(),name='category'),
+    path('mobile/home/',HomeList.as_view(),name='home'),
 
 
     
