@@ -3,6 +3,7 @@ from management_app.View.CategoryAPI import *
 from management_app.View.ProductAPI import *
 from management_app.View.BrandAPI import *
 from management_app.MobileAPIView.ProductViews import GetProductAPI, FilterProductAPI, AddProductAPI
+from management_app.MobileAPIView.FavouriteViews import AddFavouriteAPI, RemoveFavouriteAPI, ListFavouriteAPI
 
 
 urlpatterns = [
@@ -22,5 +23,9 @@ urlpatterns = [
 
     path('get_product/', GetProductAPI.as_view(), name='getproduct-api'),
     path('filter_product/', FilterProductAPI.as_view(), name='filterproduct-api'),
-    path('add_product/', AddProductAPI.as_view(), name='addproduct-api')
+    path('add_product/', AddProductAPI.as_view(), name='addproduct-api'),
+
+    path('add_favourite/', AddFavouriteAPI.as_view(), name='add-favourite'),
+    path('remove_favourite/', RemoveFavouriteAPI.as_view(), name='remove-favourite'),
+    path('list_favourite/', ListFavouriteAPI.as_view(), name='list-favourite')
 ]
