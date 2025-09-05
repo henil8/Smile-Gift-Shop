@@ -200,6 +200,7 @@ class BankDetailsAdmin(admin.ModelAdmin):
     search_fields = ("bank_name", "account_number", "ifsc_code")
     list_filter = ("bank_name",)
 
+
 @admin.register(VersionModel)
 class VersionAdmin(admin.ModelAdmin):
     list_display = ("android_id","android_version","android_description","android_status","ios_id",
@@ -211,3 +212,22 @@ class VersionAdmin(admin.ModelAdmin):
 class OffersliderAdmin(admin.ModelAdmin):
     list_display = ("image","banner_number","created_at","updated_at","deleted_at")
     search_fields = ()
+
+
+@admin.register(FavouriteModel)
+class FavouriteAdmin(admin.ModelAdmin):
+    list_display = ("user_id", "product_id", "status", "created_at", "updated_at", "deleted_at")
+    search_fields = ("user_id", "product_id", "created_at")
+    
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = (
+            "id","user","product","brand","qty","price","total_price","status","created_at","updated_at",
+        )
+    list_filter = ("status", "created_at", "updated_at", "brand")
+    search_fields = ("user__email", "user__first_name", "user__last_name", "product__name", "brand__name")
+    ordering = ("-created_at",)
+
+    def total_price(self, obj):
+            return obj.total_price
+

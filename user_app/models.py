@@ -108,13 +108,17 @@ class AddressModel(models.Model):
         choices=address_types, max_length=255, blank=True, null=True)
     mobile = PhoneNumberField(blank=True, null=True)
     another_mobile = PhoneNumberField(blank=True, null=True)
-    address_line_1 = models.TextField(blank=True, null=True)
-    address_line_2 = models.TextField(blank=True, null=True)
+    street = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
     landmark = models.CharField(max_length=255, blank=True, null=True)
-    city = models.ForeignKey(CitiesModel, on_delete=models.DO_NOTHING, blank=True, null=True)
-    state = models.ForeignKey(StatesModel, on_delete=models.DO_NOTHING, blank=True, null=True)
-    postal_code = models.CharField(max_length=10, verbose_name='postal code', blank=True, null=True)
-    country = models.ForeignKey(CountryModel, on_delete=models.CASCADE, blank=True, null=True)
+    pincode = models.CharField(max_length=10, verbose_name='pin code', blank=True, null=True)
+    # city = models.ForeignKey(CitiesModel, on_delete=models.DO_NOTHING, blank=True, null=True)
+    # state = models.ForeignKey(StatesModel, on_delete=models.DO_NOTHING, blank=True, null=True)
+    # country = models.ForeignKey(CountryModel, on_delete=models.CASCADE, blank=True, null=True)
+    city = models.CharField(max_length=150, blank=True, null=True)
+    state = models.CharField(max_length=150, blank=True, null=True)
+    country = models.CharField(max_length=150, blank=True, null=True)
+
     is_default = models.BooleanField(default=False)
 
     class Meta:
@@ -122,7 +126,7 @@ class AddressModel(models.Model):
         verbose_name_plural = 'addresses'
 
     def __str__(self):
-        return f"{self.address_line_1 if self.address_line_1 else ''}, {self.address_line_2 if self.address_line_2 else ''}, {self.landmark if self.landmark else ''}, {self.city.name if self.city else ''}, {self.state.name if self.state else ''}, {self.country.country_name if self.country else ''} - {self.postal_code if self.postal_code else ''}"
+        return f"{self.address}, {self.landmark if self.landmark else ''}, {self.city if self.city else ''}, {self.state if self.state else ''}, {self.country if self.country else ''} - {self.pincode if self.pincode else ''}"
 
 
 class UserModel(AbstractBaseUser, PermissionsMixin):
@@ -138,9 +142,8 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     mobile_no = PhoneNumberField(null=True,blank=True)
     address = models.ManyToManyField(AddressModel, blank=True)
     approved_status = models.CharField(max_length=100,null=True,blank=True)
-    
+    token = models.CharField(max_length=255,blank=True,null=True)
 
-    
     objects = AccountManager()
 
     USERNAME_FIELD = "email"
@@ -155,3 +158,22 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'user'
         verbose_name_plural = 'users'
+
+class ProfileModel(models.Model):
+    user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
+    profile_pic = models.ImageField(upload_to='Profile', blank=True, null=True)
+    mobile_no = PhoneNumberField(unique=True, blank=True, null=True)
+    addresses = models.ManyToManyField(AddressModel, blank=True)
+    otp = models.IntegerField(blank=True, null=True)
+    otp_requested_at = models.DateTimeField(blank=True, null=True)
+    os_type = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return self.user.email
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['user'], name='idx_profile_user'),
+            models.Index(fields=['mobile_no'], name='idx_profile_mobile_no_unique'),
+        ]
+

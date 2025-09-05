@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import base64
 from user_app.models import UserModel
+import random
+import string
 # Create your models here.
 
 class CategoryTagsModel(models.Model):
@@ -58,7 +60,6 @@ class CategoryModel(MP_Node):
         ]
 
 
- 
 class BrandModel(models.Model):
     name = models.CharField(max_length=255)
     image = models.ImageField(null=True,blank=True)
@@ -108,8 +109,7 @@ class ProductModel(models.Model):
         ("bottle", "Bottle"),
         ("jar", "Jar"),
     ]
- 
- 
+
     category = models.ManyToManyField(CategoryModel, blank=True , related_name='product_single_category')
     sub_category = models.ManyToManyField(CategoryModel, blank=True , related_name='product_sub_category')
     name = models.CharField(max_length=255)
@@ -172,10 +172,11 @@ class ProductModel(models.Model):
     is_tracking  = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=True)
     is_published = models.BooleanField(default=True)
+    is_favourite = models.BooleanField(default=False)
     product_tag = models.ManyToManyField(ProductTag, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-    deleted_at=models.DateTimeField(blank=True, null=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     @property
     def encrypted_id(self):
@@ -216,7 +217,8 @@ class ProductImageModel(models.Model):
     image = models.ImageField(upload_to="Products")
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-    deleted_at=models.DateTimeField(blank=True, null=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    is_primary = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Product Image"
@@ -320,10 +322,12 @@ class ThirdPartyModel(models.Model):
 
 
 class OrderModel(models.Model):
-    ORDER_STATUS = (('Pending', 'Pending'), ('Out for Delivery',
-                    'Out for Delivery'), ('Delivered', 'Delivered'), ('Cancelled', 'Cancelled'))
+    ORDER_STATUS = (('pending', 'pending'), ('out for delivery',
+                    'out for delivery'), ('delivered', 'delivered'), ('cancelled', 'cancelled'))
     PAYMENT_TYPE_CHOICES = (
-        ('Cash on Delivery', 'Cash on Delivery'), ('Online Payment', 'Online Payment'))
+        ('cod', 'cod'),
+        ('online', 'online'),
+    )
 
     class SALES_STATUS_CHOICES(models.TextChoices):
         quotation = ('Quotation', 'Quotation')
@@ -331,7 +335,7 @@ class OrderModel(models.Model):
         sales_order = ('Sales Order', 'Sales Order')
         cancel_order = ('Cancelled', 'Cancelled')
     
-    customer = models.ForeignKey('user_app.UserModel', on_delete=models.DO_NOTHING)
+    customer = models.ForeignKey('user_app.UserModel', on_delete=models.DO_NOTHING,blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     payment_id = models.CharField(max_length=255, blank=True, null=True)
     transaction_id = models.CharField(max_length=255, blank=True, null=True)
@@ -361,6 +365,19 @@ class OrderModel(models.Model):
     address = models.ForeignKey('user_app.AddressModel', on_delete= models.DO_NOTHING, blank=True,null=True)
     source_doc = models.CharField(max_length=255, blank=True, null=True)
     
+    brand_id = models.ForeignKey(BrandModel, on_delete=models.SET_NULL, null=True, blank=True)
+    recieved_id = models.IntegerField(blank=True, null=True)
+    delivery_status = models.CharField(choices=ORDER_STATUS, default='Pending', max_length=100)
+    pod_number = models.CharField(max_length=255, blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    review_status = models.CharField(max_length=50, default="pending")
+    main_price = models.FloatField(default=0.00)
+    percentage_off = models.FloatField(default=0.00)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    shipping_address = models.TextField(blank=True, null=True)
+    order_number = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    
     @property
     def total_order_qty(self):
         total_qt = 0
@@ -373,10 +390,15 @@ class OrderModel(models.Model):
         if not self.order_id:
             if OrderModel.objects.count() >= 1:
                 last_order_id = int(
-                    OrderModel.objects.last().order_id.removeprefix('SO'))
+                    OrderModel.objects.last().order_id.removeprefix('SGS'))
             else:
                 last_order_id = 0
             self.order_id = 'SGS' + str(last_order_id+1).zfill(8)
+
+        if not self.order_number:
+            letters = ''.join(random.choices(string.ascii_uppercase, k=4))
+            digits = str(random.randint(1000, 9999))
+            self.order_number = f"{letters}_{digits}"
 
         super(OrderModel, self).save(*args, **kwargs)
 
@@ -601,8 +623,7 @@ class BankDetailsModel(models.Model):
 
     def __str__(self):
         return f"{self.bank_name} - {self.account_number}"
-    
-    
+
 class VersionModel(models.Model):
     
     android_id=models.IntegerField()
@@ -636,3 +657,51 @@ class OfferSliderModel(models.Model):
  
     def __str__(self):
         return f"Slider {self.banner_number}"
+
+class FavouriteModel(models.Model):
+    user_id = models.ForeignKey('user_app.UserModel', on_delete=models.CASCADE)
+    product_id = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+    status = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.status
+
+class Cart(models.Model):
+    STATUS_CHOICES = (
+        (0, "In Cart"),  
+        (1, "Ordered"),   
+        (2, "Removed"),   
+    )
+
+    user = models.ForeignKey(
+        UserModel, on_delete=models.CASCADE, related_name="cart_items"
+    )
+    product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name="product")
+    brand = models.ForeignKey(BrandModel, on_delete=models.SET_NULL, null=True, blank=True, related_name="brand")
+
+    qty = models.PositiveIntegerField(default=1)
+    price = models.FloatField()
+
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.product:
+            self.price = float(self.product.product_price)
+        if self.product:
+            self.brand = self.product.brand
+        super().save(*args, **kwargs)
+
+    @property
+    def total_price(self):
+        return self.price * float(self.qty)
+
+    def __str__(self):
+        return f"{self.product.name} ({self.qty})"
+
