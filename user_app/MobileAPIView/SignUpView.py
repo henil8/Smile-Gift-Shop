@@ -21,7 +21,7 @@ class SignUpView(APIView):
         if not email or not mobile_no or not first_name or not last_name or not firebase_token:
             return Response(
                 {'status': False, 'message': 'Email, Mobile no, First name, Last name and token are required'},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK
             )
         
         if mobile_no and not mobile_no.startswith("+91"):
@@ -31,7 +31,7 @@ class SignUpView(APIView):
             if ProfileModel.objects.filter(mobile_no=mobile_no).exists():
                 return Response(
                     {'status': False, 'message': f'Mobile number {mobile_no} already exists'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_200_OK
                 )
             
             request_data = request.data.copy()
@@ -66,7 +66,7 @@ class SignUpView(APIView):
             else:
                 return Response(
                     {'status': False, "message": f'User already exists with given email - {email}', 'errors': serializer.errors},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_200_OK
                 )
 
         except Exception as e:

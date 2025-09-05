@@ -13,7 +13,7 @@ class GetUserView(APIView):
         if not user_id:
             return Response(
                 {"status":False, "message": "user_id is required"},
-                status = status.HTTP_400_BAD_REQUEST,
+                status = status.HTTP_200_OK,
             )
         
         try:
@@ -25,7 +25,7 @@ class GetUserView(APIView):
                     "message": "User Not Found",
                     "errors": "User Not Found",
                 },
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         
         serializer = UserSerializer(user)
@@ -33,7 +33,8 @@ class GetUserView(APIView):
         return Response({
             "status": True,
             "message": "List User Profile Successfully",
-            "data": [serializer.data]
+            "data": [serializer.data],
+            "base_url": "http://192.168.1.15:5000"
         })
     
 class UserUpdateView(APIView):
@@ -42,7 +43,7 @@ class UserUpdateView(APIView):
         if not user_id:
             return Response(
                 {"status": False, "message": "user_id is required"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         user = get_object_or_404(UserModel, id=user_id)
@@ -59,12 +60,13 @@ class UserUpdateView(APIView):
                     "status": True,
                     "message": "Profile updated successfully",
                     "data": serializer.data,
+                    "base_url": "http://192.168.1.15:5000"
                 },
                 status=status.HTTP_200_OK,
             )
         return Response(
             {"status": False, "errors": serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST,
+            status=status.HTTP_200_OK,
         )
     
 class UserDeleteView(APIView):
@@ -73,7 +75,7 @@ class UserDeleteView(APIView):
         if not user_id:
             return Response(
                 {"status": False, "message": "user_id is required"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
         try:
@@ -85,7 +87,7 @@ class UserDeleteView(APIView):
                     "message": "User with this ID was not found",
                     "errors": "User Not Found",
                 },
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # delete DRF Token if exists

@@ -16,7 +16,7 @@ class GetCartAPIView(APIView):
                 "status": False,
                 "message": "User ID is required",
                 "errors": {"user_id": "This field is required"}
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_200_OK)
 
         user = UserModel.objects.filter(id=user_id).first()
         if not user:
@@ -24,7 +24,7 @@ class GetCartAPIView(APIView):
                 "status": False,
                 "message": "User Not Found",
                 "errors": "User Not Found"
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         carts = Cart.objects.filter(user=user, status=0)
 
@@ -33,25 +33,29 @@ class GetCartAPIView(APIView):
                 "status": False,
                 "message": "Your cart is empty",
                 "errors": "Data not found"
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_200_OK)
         serializer = CartSerializer(carts, many=True)
 
         return Response({
             "status": True,
             "message": "Cart fetched successfully",
-            "data": serializer.data
+            "data": serializer.data,
+            "base_url": "http://192.168.1.15:5000"
         }, status=status.HTTP_200_OK)
 
 
 class AddToCartAPIView(APIView):
-    """
-    POST request with {"user_id": 1, "product_id": 2, "qty": 3}
-    to add a product into user's cart
-    """
     def post(self, request, *args, **kwargs):
         user_id = request.data.get("user_id")
         product_id = request.data.get("product_id")
         qty = request.data.get("qty", 1)
+        
+        if not user_id or not product_id or not qty:
+            return Response({
+                "status": False,
+                "message": "All fields are required",
+                "errors": "Provide All fields."
+            }, status=status.HTTP_200_OK)
 
         # User check
         user = UserModel.objects.filter(id=user_id).first()
@@ -60,7 +64,7 @@ class AddToCartAPIView(APIView):
                 "status": False,
                 "message": "User Not Found",
                 "errors": "User Not Found"
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         # Product check
         product = ProductModel.objects.filter(id=product_id).first()
@@ -69,7 +73,7 @@ class AddToCartAPIView(APIView):
                 "status": False,
                 "message": "Product Not Found",
                 "errors": "Product Not Found"
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_200_OK)
 
         # If cart item already exists → update qty
         cart_item, created = Cart.objects.get_or_create(
@@ -82,9 +86,86 @@ class AddToCartAPIView(APIView):
             cart_item.save()
 
         serializer = CartSerializer(cart_item)
-
+        count = Cart.objects.filter(user=user).count()
         return Response({
             "status": True,
+            "data": serializer.data,
+            "count": count,
             "message": "Item added to cart successfully",
-            "data": serializer.data
         }, status=status.HTTP_201_CREATED)
+
+class UpdateCartAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id")
+        product_id = request.data.get("product_id")
+        qty = request.data.get("qty")
+
+        if not user_id or not product_id or qty is None:
+            return Response(
+                {"error": "user_id, product_id and qty are required"},
+                status=status.HTTP_200_OK
+            )
+            
+        try:
+            user = UserModel.objects.get(id=user_id)
+            product = ProductModel.objects.get(id=product_id)
+        except UserModel.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except ProductModel.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            cart_item = Cart.objects.get(user=user, product=product)
+            cart_item.qty = qty
+            cart_item.save()
+
+            serializer = CartSerializer(cart_item)
+            
+            return Response(
+                {
+                    "status": True,
+                    "data": serializer.data,
+                    "message": "Cart updated successfully",
+                },
+                status=status.HTTP_200_OK
+            )
+        except Cart.DoesNotExist:
+            return Response(
+                {"status": False, "message": "Cart item not found for this user and product"},
+                status=status.HTTP_200_OK
+            )
+
+class RemoveCartAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id")
+        product_id = request.data.get("product_id")
+
+        if not user_id or not product_id:
+            return Response(
+                {"error": "user_id and product_id are required"},
+                status=status.HTTP_200_OK
+            )
+
+        try:
+            cart_item = Cart.objects.get(user_id=user_id, product_id=product_id)
+            cart_item.delete()
+            
+            count = Cart.objects.filter(user_id=user_id).count()
+
+            return Response(
+                {
+                    "status": True,
+                    "message": "Remove Product from Cart Successfully",
+                    "count": count,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Cart.DoesNotExist:
+            return Response(
+                {
+                    "status": False,
+                    "message": "No Products In the cart",
+                    "count": 0,
+                },
+                status=status.HTTP_200_OK, 
+            )
