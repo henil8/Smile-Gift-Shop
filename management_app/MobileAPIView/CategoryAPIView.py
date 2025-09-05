@@ -23,7 +23,7 @@ class CategoryList(APIView):
             "data": serialized.data,
             "base_url": "http://192.168.1.15:5000"
         }
-        return Response(data)
+        return Response(data, status=status.HTTP_200_OK)
     
 class SubCategoryList(APIView):
     def post(self, request):
